@@ -2,10 +2,7 @@ package view;
 
 import dao.LaptopDAO;
 import dao.MayTinhDAO;
-import dao.PCDAO;
-import model.Laptop;
 import model.MayTinh;
-import model.PC;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -13,17 +10,22 @@ import java.awt.*;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
-
 public class ProductForm extends JPanel {
-
     private DefaultTableModel tblModel;
-    DecimalFormat formatter = new DecimalFormat("###,###,###");
-
+    private JTable tblSanPham;
+    private JTextField txtSearch;
+    private JComboBox<String> cbFilter;
+    private DecimalFormat formatter = new DecimalFormat("###,###,###");
 
     public ProductForm() {
-
         setLayout(null);
-        // Panel chức năng
+        initFunctionPanel();
+        initSearchPanel();
+        initTable();
+        loadDataToTable();
+    }
+
+    private void initFunctionPanel() {
         JPanel functionPanel = new JPanel(null);
         functionPanel.setBorder(BorderFactory.createTitledBorder("Chức năng"));
         functionPanel.setBounds(10, 10, 440, 90);
@@ -35,11 +37,11 @@ public class ProductForm extends JPanel {
         JButton btnExport = createIconButton("icons/icons8_spreadsheet_file_40px.png", "Xuất Excel", 305, 25);
         JButton btnImport = createIconButton("icons/icons8_xls_40px.png", "Nhập Excel", 370, 25);
 
-        // Nút reset không đổ nền
         btnReset.setFocusPainted(false);
         btnReset.setContentAreaFilled(false);
 
-        // Thêm vào function panel
+        btnAdd.addActionListener(e -> showAddProductForm());
+
         functionPanel.add(btnAdd);
         functionPanel.add(btnDelete);
         functionPanel.add(btnEdit);
@@ -47,21 +49,19 @@ public class ProductForm extends JPanel {
         functionPanel.add(btnExport);
         functionPanel.add(btnImport);
 
-        // Sự kiện cho btnAdd
-        btnAdd.addActionListener(e -> showAddProductForm());
-
         add(functionPanel);
+    }
 
-        // Panel tìm kiếm
+    private void initSearchPanel() {
         JPanel searchPanel = new JPanel(null);
         searchPanel.setBorder(BorderFactory.createTitledBorder("Tìm kiếm"));
         searchPanel.setBounds(460, 10, 550, 90);
 
-        JComboBox<String> cbFilter = new JComboBox<>(new String[]{"Tất cả", "Hoạt động", "Khóa"});
+        cbFilter = new JComboBox<>(new String[]{"Tất cả", "Hoạt động", "Khóa"});
         cbFilter.setBounds(20, 35, 100, 30);
         searchPanel.add(cbFilter);
 
-        JTextField txtSearch = new JTextField();
+        txtSearch = new JTextField();
         txtSearch.setBounds(130, 35, 295, 30);
         searchPanel.add(txtSearch);
 
@@ -70,21 +70,20 @@ public class ProductForm extends JPanel {
         searchPanel.add(btnRefresh);
 
         add(searchPanel);
-
-        initTable();
-        loadDataToTable();
     }
 
-    public final void initTable() {
+    private void initTable() {
         tblModel = new DefaultTableModel();
-        String[] headerTbl = new String[]{"Mã máy", "Tên máy", "Số lượng", "Đơn giá", "Bộ xử lí", "RAM", "Bộ nhớ", "Loại máy"};
-        tblModel.setColumnIdentifiers(headerTbl);
-        JTable tblSanPham = new JTable(tblModel);
+        String[] headers = {"Mã máy", "Tên máy", "Số lượng", "Đơn giá", "Bộ xử lí", "RAM", "Bộ nhớ", "Loại máy"};
+        tblModel.setColumnIdentifiers(headers);
+
+        tblSanPham = new JTable(tblModel);
         tblSanPham.getColumnModel().getColumn(0).setPreferredWidth(5);
         tblSanPham.getColumnModel().getColumn(1).setPreferredWidth(200);
         tblSanPham.getColumnModel().getColumn(2).setPreferredWidth(5);
         tblSanPham.getColumnModel().getColumn(5).setPreferredWidth(5);
         tblSanPham.getColumnModel().getColumn(6).setPreferredWidth(5);
+
         JScrollPane scrollPane = new JScrollPane(tblSanPham);
         scrollPane.setBounds(10, 110, 1000, 500);
         add(scrollPane, BorderLayout.CENTER);
@@ -97,18 +96,16 @@ public class ProductForm extends JPanel {
             tblModel.setRowCount(0);
             for (MayTinh i : armt) {
                 if (i.getTrangThai() == 1) {
-                    String loaimay;
-                    if (LaptopDAO.getInstance().isLaptop(i.getMaMay()) == true) {
-                        loaimay = "Laptop";
-                    } else {
-                        loaimay = "PC/Case";
-                    }
+                    String loaiMay = LaptopDAO.getInstance().isLaptop(i.getMaMay()) ? "Laptop" : "PC/Case";
                     tblModel.addRow(new Object[]{
-                            i.getMaMay(), i.getTenMay(), i.getSoLuong(), formatter.format(i.getGia()) + "đ", i.getTenCpu(), i.getRam(), i.getRom(), loaimay
+                            i.getMaMay(), i.getTenMay(), i.getSoLuong(),
+                            formatter.format(i.getGia()) + "đ", i.getTenCpu(),
+                            i.getRam(), i.getRom(), loaiMay
                     });
                 }
             }
         } catch (Exception e) {
+            e.printStackTrace(); // log lỗi ra console
         }
     }
 
@@ -121,12 +118,11 @@ public class ProductForm extends JPanel {
     }
 
     private void showAddProductForm() {
-        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Thêm tài khoản", true);
+        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Thêm sản phẩm", true);
         dialog.setContentPane(new AddProductForm());
         dialog.pack();
         dialog.setLocationRelativeTo(this);
         dialog.setResizable(false);
         dialog.setVisible(true);
     }
-
 }

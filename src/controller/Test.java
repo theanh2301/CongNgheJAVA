@@ -16,9 +16,9 @@ public class Test {
         String password = "admin";
         String hash = BCrypt.hashpw(password, BCrypt.gensalt(12));
         System.out.println("BCrypt hash: " + hash);
-        boolean valuate = BCrypt.checkpw(password, "$2a$12$z4LV6HekAKa8mgywwiZtQO29YnXRRPx38TxEGOQNMT411TsUuFSYO");
+        boolean valuate = BCrypt.checkpw(password, "$2a$12$Rlm9OxcbiDM8Pp18kAPuw.p2APCqa8IHkQBgQ35rmY3BklrIyRLm");
         System.out.println(valuate);
-        SendEmailSMTP.sendOTP("becam0582@gmail.com","12345");
+        //SendEmailSMTP.sendOTP("becam0582@gmail.com","12345");
 
 
         //kiem tra mat khauxem dung hay sai

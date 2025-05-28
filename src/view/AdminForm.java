@@ -89,10 +89,10 @@ public class AdminForm extends JFrame {
         add(contentPanel, BorderLayout.CENTER);
     }
 
-    public static void main(String[] args) {
+    /*public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             AdminForm frame = new AdminForm();
             frame.setVisible(true);
         });
-    }
+    }*/
 }

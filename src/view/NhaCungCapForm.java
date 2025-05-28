@@ -1,31 +1,51 @@
 package view;
 
+import dao.NhaCungCapDAO;
+import model.NhaCungCap;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.ArrayList;
 
 public class NhaCungCapForm extends JPanel {
 
-    public NhaCungCapForm() {
+    private JTable tblNCC;
+    private DefaultTableModel tblModel;
+    private ArrayList<NhaCungCap> armt;
 
+    private JButton btnAdd, btnDelete, btnEdit, btnReset, btnExport, btnImport;
+    private JComboBox<String> cbFilter;
+    private JTextField txtSearch;
+    private JButton btnRefresh;
+
+    public NhaCungCapForm() {
         setLayout(null);
-        // Panel chức năng
+
+        initFunctionPanel();
+        initSearchPanel();
+        initTablePanel();
+
+        initTable();
+        armt = NhaCungCapDAO.getInstance().selectAll();
+        loadDataToTable(armt);
+    }
+
+    private void initFunctionPanel() {
         JPanel functionPanel = new JPanel(null);
         functionPanel.setBorder(BorderFactory.createTitledBorder("Chức năng"));
         functionPanel.setBounds(10, 10, 440, 90);
 
-        JButton btnAdd = createIconButton("icons/icons8_add_40px.png", "Thêm", 15, 25);
-        JButton btnDelete = createIconButton("icons/icons8_delete_40px.png", "Xoá", 80, 25);
-        JButton btnEdit = createIconButton("icons/icons8_edit_40px.png", "Sửa", 145, 25);
-        JButton btnReset = createIconButton("icons/icons8-update-left-rotation-40.png", "Đặt lại", 210, 25);
-        JButton btnExport = createIconButton("icons/icons8_spreadsheet_file_40px.png", "Xuất Excel", 305, 25);
-        JButton btnImport = createIconButton("icons/icons8_xls_40px.png", "Nhập Excel", 370, 25);
+        btnAdd = createIconButton("icons/icons8_add_40px.png", "Thêm", 15, 25);
+        btnDelete = createIconButton("icons/icons8_delete_40px.png", "Xoá", 80, 25);
+        btnEdit = createIconButton("icons/icons8_edit_40px.png", "Sửa", 145, 25);
+        btnReset = createIconButton("icons/icons8-update-left-rotation-40.png", "Đặt lại", 210, 25);
+        btnExport = createIconButton("icons/icons8_spreadsheet_file_40px.png", "Xuất Excel", 305, 25);
+        btnImport = createIconButton("icons/icons8_xls_40px.png", "Nhập Excel", 370, 25);
 
-        // Nút reset không đổ nền
         btnReset.setFocusPainted(false);
         btnReset.setContentAreaFilled(false);
 
-        // Thêm vào function panel
         functionPanel.add(btnAdd);
         functionPanel.add(btnDelete);
         functionPanel.add(btnEdit);
@@ -33,44 +53,61 @@ public class NhaCungCapForm extends JPanel {
         functionPanel.add(btnExport);
         functionPanel.add(btnImport);
 
-        // Sự kiện cho btnAdd
-        //btnAdd.addActionListener(e -> showAddAccountForm());
+        btnAdd.addActionListener(e -> showAddNhaCungCapForm());
 
         add(functionPanel);
+    }
 
-        // Panel tìm kiếm
+    private void initSearchPanel() {
         JPanel searchPanel = new JPanel(null);
         searchPanel.setBorder(BorderFactory.createTitledBorder("Tìm kiếm"));
         searchPanel.setBounds(460, 10, 550, 90);
 
-        JComboBox<String> cbFilter = new JComboBox<>(new String[]{"Tất cả", "Hoạt động", "Khóa"});
+        cbFilter = new JComboBox<>(new String[]{"Tất cả", "Hoạt động", "Khóa"});
         cbFilter.setBounds(20, 35, 100, 30);
         searchPanel.add(cbFilter);
 
-        JTextField txtSearch = new JTextField();
+        txtSearch = new JTextField();
         txtSearch.setBounds(130, 35, 295, 30);
         searchPanel.add(txtSearch);
 
-        JButton btnRefresh = new JButton("Làm mới");
+        btnRefresh = new JButton("Làm mới");
         btnRefresh.setBounds(435, 35, 100, 30);
         searchPanel.add(btnRefresh);
 
         add(searchPanel);
-
-        // Bảng dữ liệu
-        String[] columnNames = {"Tên tài khoản", "Tên đăng nhập", "Vai trò", "Trạng thái"};
-        DefaultTableModel model = new DefaultTableModel(columnNames, 0);
-        JTable table = new JTable(model);
-        JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setBounds(10, 110, 1000, 540);
-        add(scrollPane);
-
-        btnAdd.addActionListener(e -> showAddNhaCungCapForm());
-
-
     }
 
-    // Hàm tạo nút có icon và tooltip
+    private void initTablePanel() {
+        tblNCC = new JTable();
+        JScrollPane scrollPane = new JScrollPane(tblNCC);
+        scrollPane.setBounds(10, 110, 1000, 400);
+        add(scrollPane);
+
+        tblNCC.setDefaultEditor(Object.class, null); // Không cho chỉnh sửa trực tiếp
+    }
+
+    private void initTable() {
+        tblModel = new DefaultTableModel();
+        String[] headerTbl = new String[]{"Mã NCC", "Tên nhà cung cấp", "Số điện thoại", "Địa chỉ"};
+        tblModel.setColumnIdentifiers(headerTbl);
+        tblNCC.setModel(tblModel);
+
+        tblNCC.getColumnModel().getColumn(0).setPreferredWidth(1);
+        tblNCC.getColumnModel().getColumn(1).setPreferredWidth(300);
+        tblNCC.getColumnModel().getColumn(2).setPreferredWidth(2);
+        tblNCC.getColumnModel().getColumn(3).setPreferredWidth(350);
+    }
+
+    public void loadDataToTable(ArrayList<NhaCungCap> nccList) {
+        tblModel.setRowCount(0);
+        for (NhaCungCap ncc : nccList) {
+            tblModel.addRow(new Object[]{
+                    ncc.getMaNhaCungCap(), ncc.getTenNhaCungCap(), ncc.getSdt(), ncc.getDiaChi()
+            });
+        }
+    }
+
     private JButton createIconButton(String iconPath, String tooltip, int x, int y) {
         JButton button = new JButton(new ImageIcon(iconPath));
         button.setBounds(x, y, 55, 55);
@@ -79,27 +116,12 @@ public class NhaCungCapForm extends JPanel {
         return button;
     }
 
-    // Mở form thêm tài khoản
     private void showAddNhaCungCapForm() {
-        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Thêm tài khoản", true);
-        dialog.setContentPane(new AddNhaCungCap()); // AddAccountForm là JPanel
+        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Thêm nhà cung cấp", true);
+        dialog.setContentPane(new AddNhaCungCap()); // JPanel chứa form thêm
         dialog.pack();
         dialog.setLocationRelativeTo(this);
         dialog.setResizable(false);
         dialog.setVisible(true);
     }
-
-    /*// Mở form thêm tài khoản
-    private void showAddAccountForm() {
-        JDialog dialog = new JDialog(this, "Thêm tài khoản", true);
-        dialog.setContentPane(new AddAccountForm()); // AddAccountForm cần là JPanel
-        dialog.pack();
-        dialog.setLocationRelativeTo(this);
-        dialog.setResizable(false);
-        dialog.setVisible(true);
-    }*/
-
-    /*public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new AccountForm().setVisible(true));
-    }*/
 }

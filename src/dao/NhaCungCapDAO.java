@@ -98,7 +98,6 @@ public class NhaCungCapDAO implements DAOInterface<NhaCungCap> {
                 ketQua.add(ncc);
             }
         } catch (Exception e) {
-            // TODO: handle exception
             e.printStackTrace();
         }
         return ketQua;

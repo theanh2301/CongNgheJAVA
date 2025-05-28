@@ -1,5 +1,9 @@
 package view;
 
+import controller.BCrypt;
+import dao.AccountDAO;
+import model.Account;
+
 import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
@@ -9,6 +13,13 @@ public class AddAccountForm extends JPanel {
     private JPasswordField pfPassword;
     private JComboBox<String> cbRole;
     private JButton btnSave, btnCancel;
+
+    private AccountForm homeAcc;
+
+    public AddAccountForm(AccountForm homeAcc) {
+        this(); // gọi constructor mặc định
+        this.homeAcc = homeAcc;
+    }
 
     public AddAccountForm() {
         setLayout(null);
@@ -108,6 +119,12 @@ public class AddAccountForm extends JPanel {
 
         // Đặt kích thước tổng thể
         setPreferredSize(new Dimension(450, y + 80));
+
+        btnSave.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnSaveClick(evt);
+            }
+        });
     }
 
     private void clearFields() {
@@ -116,5 +133,27 @@ public class AddAccountForm extends JPanel {
         tfEmail.setText("");
         pfPassword.setText("");
         cbRole.setSelectedIndex(0);
+    }
+
+    private void btnSaveClick(java.awt.event.MouseEvent evt) {
+        String fullName = tfFullName.getText();
+        String user = tfUsername.getText();
+        String password = BCrypt.hashpw(pfPassword.getText(), BCrypt.gensalt(12));
+        String role = cbRole.getSelectedItem().toString();
+        String email = tfEmail.getText();
+        if (fullName.equals("") || user.equals("") || password.equals("") || role.equals("") || email.equals("")) {
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ thông tin !", "Cảnh báo ", JOptionPane.WARNING_MESSAGE);
+        } else {
+            if (AccountDAO.getInstance().selectById(user) == null) {
+                Account acc = new Account(fullName, user, password, role, 1, email);
+                AccountDAO.getInstance().insert(acc);
+                JOptionPane.showMessageDialog(this, "Thêm thành công !");
+                homeAcc.loadDataToTable(AccountDAO.getInstance().selectAll());
+            } else {
+                JOptionPane.showMessageDialog(this, "Tên đăng nhập đã tồn tại !", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+            }
+
+        }
+
     }
 }
